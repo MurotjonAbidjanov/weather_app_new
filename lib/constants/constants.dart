@@ -11,7 +11,11 @@ final cTempTextStyle = TextStyle(
     fontWeight: FontWeight.bold,
     color: Colors.white.withOpacity(0.8));
 
-const cAPI = 'ec97226a0b8acfa6c3feb070a89126ef';
+const cAPIkey = 'ec97226a0b8acfa6c3feb070a89126ef';
 
-const cHttp =
+const cHttpCityName =
     'https://api.openweathermap.org/data/2.5/weather?q={city name}&appid={API key}';
+
+
+const cHttpLatLong =
+    'https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API key}';
