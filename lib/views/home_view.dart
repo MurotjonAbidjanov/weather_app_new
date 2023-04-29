@@ -1,7 +1,10 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 import 'package:weather_app_new/views/search_view.dart';
 import '../constants/constants.dart';
 
@@ -13,6 +16,9 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
+  String city = '';
+  double? temp;
+
   Future<Position> getPosition() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -43,8 +49,20 @@ class _HomeViewState extends State<HomeView> {
     super.initState();
   }
 
+  showCurentData(Position position) async {
+    var client = http.Client();
+    Uri uri = Uri.parse(
+        'https://api.openweathermap.org/data/2.5/weather?lat=${position.latitude}&lon=${position.longitude}&appid=$cAPIkey');
+    final data = await client.get(uri);
+    final jsonAnswer = jsonDecode(data.body);
+    city = jsonAnswer['name'];
+    temp = jsonAnswer['main']['temp'];
+    setState(() {});
+  }
+
   showWeatherLocation() async {
     final position = await getPosition();
+    await showCurentData(position);
     log('current LATITUDE ${position.latitude}');
     log('current LONGITUDE ${position.longitude}');
   }
@@ -57,7 +75,7 @@ class _HomeViewState extends State<HomeView> {
         appBar: AppBar(
           centerTitle: true,
           title: Text(
-            'Osh',
+            city,
             style: TextStyle(
                 fontSize: 35,
                 fontWeight: FontWeight.bold,
@@ -99,7 +117,8 @@ class _HomeViewState extends State<HomeView> {
               Positioned(
                 top: 120,
                 left: 20,
-                child: Text('19°C'.toUpperCase(), style: cTempTextStyle),
+                child: Text('${temp}°C'.toUpperCase().toString(),
+                    style: cTempTextStyle),
               ),
               Positioned(
                 top: 110,
