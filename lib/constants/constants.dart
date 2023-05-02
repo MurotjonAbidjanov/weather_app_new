@@ -16,6 +16,14 @@ const cAPIkey = 'ec97226a0b8acfa6c3feb070a89126ef';
 const cHttpCityName =
     'https://api.openweathermap.org/data/2.5/weather?q={city name}&appid={API key}';
 
-
 const cHttpLatLong =
     'https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API key}';
+
+
+
+String calculateResult(
+  double temp,
+) {
+  final _result = temp - 273.15;
+  return _result.toStringAsFixed(1);
+}

@@ -1,10 +1,8 @@
 import 'dart:convert';
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
-import 'package:http/http.dart';
 import 'package:weather_app_new/views/search_view.dart';
 import '../constants/constants.dart';
 
@@ -17,7 +15,7 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   String city = '';
-  double? temp;
+  double temp = 0;
 
   Future<Position> getPosition() async {
     bool serviceEnabled;
@@ -56,7 +54,8 @@ class _HomeViewState extends State<HomeView> {
     final data = await client.get(uri);
     final jsonAnswer = jsonDecode(data.body);
     city = jsonAnswer['name'];
-    temp = jsonAnswer['main']['temp'];
+    final kelvin = jsonAnswer['main']['temp'];
+    temp = kelvin - 273.15;
     setState(() {});
   }
 
@@ -117,7 +116,7 @@ class _HomeViewState extends State<HomeView> {
               Positioned(
                 top: 120,
                 left: 20,
-                child: Text('${temp}°C'.toUpperCase().toString(),
+                child: Text('${temp.toStringAsFixed(0)}°C'.toUpperCase(),
                     style: cTempTextStyle),
               ),
               Positioned(
