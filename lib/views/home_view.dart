@@ -16,6 +16,7 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   String city = '';
   double temp = 0;
+  String country = '';
 
   Future<Position> getPosition() async {
     bool serviceEnabled;
@@ -51,19 +52,25 @@ class _HomeViewState extends State<HomeView> {
     var client = http.Client();
     Uri uri = Uri.parse(
         'https://api.openweathermap.org/data/2.5/weather?lat=${position.latitude}&lon=${position.longitude}&appid=$cAPIkey');
-    final data = await client.get(uri);
-    final jsonAnswer = jsonDecode(data.body);
-    city = jsonAnswer['name'];
-    final kelvin = jsonAnswer['main']['temp'];
-    temp = kelvin - 273.15;
-    setState(() {});
+    try {
+      final data = await client.get(uri);
+      final jsonAnswer = jsonDecode(data.body);
+      city = jsonAnswer['name'];
+      final kelvin = jsonAnswer['main']['temp'];
+      temp = kelvin - 273.15;
+      setState(() {});
+      country = jsonAnswer['sys']['country'];
+      log('country =====> $country');
+      log('city =====> $city');
+      log('temp =====> ${temp.toStringAsFixed(0)}');
+    } catch (e) {
+      print('$e');
+    }
   }
 
   showWeatherLocation() async {
     final position = await getPosition();
     await showCurentData(position);
-    log('current LATITUDE ${position.latitude}');
-    log('current LONGITUDE ${position.longitude}');
   }
 
   @override
@@ -172,8 +179,16 @@ class _HomeViewState extends State<HomeView> {
                     Text(
                       '🧃',
                       style: cDescTextstyle,
-                    )
+                    ),
                   ],
+                ),
+              ),
+              Positioned(
+                left: 15,
+                bottom: 5,
+                child: Text(
+                  country,
+                  style: TextStyle(fontSize: 60, color: Colors.grey[500], fontWeight: FontWeight.w700),
                 ),
               ),
             ],
