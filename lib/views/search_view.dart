@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:weather_app_new/views/home_view.dart';
 
 class SearchView extends StatefulWidget {
   const SearchView({Key? key}) : super(key: key);
@@ -8,6 +9,8 @@ class SearchView extends StatefulWidget {
 }
 
 class _SearchViewState extends State<SearchView> {
+  final _controller = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,6 +36,7 @@ class _SearchViewState extends State<SearchView> {
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: TextField(
                     textAlign: TextAlign.center,
+                    controller: _controller,
                     decoration: InputDecoration(
                       enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -41,7 +45,10 @@ class _SearchViewState extends State<SearchView> {
                       suffixIcon: IconButton(
                           onPressed: () {
                             FocusScope.of(context).unfocus();
-                            Navigator.pop(context);
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => HomeView(_controller.text)));
                           },
                           icon: Icon(
                             Icons.arrow_forward_ios_outlined,

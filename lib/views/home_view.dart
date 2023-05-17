@@ -7,8 +7,8 @@ import 'package:weather_app_new/views/search_view.dart';
 import '../constants/constants.dart';
 
 class HomeView extends StatefulWidget {
-  const HomeView({super.key});
-
+  HomeView(this.textFieldText) : super();
+  final String textFieldText;
   @override
   State<HomeView> createState() => _HomeViewState();
 }
@@ -184,11 +184,25 @@ class _HomeViewState extends State<HomeView> {
                 ),
               ),
               Positioned(
-                left: 15,
+                right: 15,
                 bottom: 5,
                 child: Text(
                   country,
-                  style: TextStyle(fontSize: 60, color: Colors.grey[500], fontWeight: FontWeight.w700),
+                  style: TextStyle(
+                      fontSize: 60,
+                      color: Colors.grey[500],
+                      fontWeight: FontWeight.w700),
+                ),
+              ),
+              Positioned(
+                left: 15,
+                bottom: 5,
+                child: Text(
+                  '${widget.textFieldText}',
+                  style: TextStyle(
+                      fontSize: 60,
+                      color: Colors.white70,
+                      fontWeight: FontWeight.w700),
                 ),
               ),
             ],
