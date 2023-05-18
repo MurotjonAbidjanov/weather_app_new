@@ -35,6 +35,7 @@ class _SearchViewState extends State<SearchView> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: TextField(
+                    maxLength: 20,
                     textAlign: TextAlign.center,
                     controller: _controller,
                     decoration: InputDecoration(
@@ -48,7 +49,8 @@ class _SearchViewState extends State<SearchView> {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => HomeView(_controller.text)));
+                                    builder: (context) =>
+                                        HomeView(_controller.text)));
                           },
                           icon: Icon(
                             Icons.arrow_forward_ios_outlined,
