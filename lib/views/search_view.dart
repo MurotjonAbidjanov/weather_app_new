@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:weather_app_new/views/home_view.dart';
 
 class SearchView extends StatefulWidget {
-  const SearchView({Key? key}) : super(key: key);
+  SearchView({
+    Key? key,
+  }) : super(key: key);
 
   @override
   _SearchViewState createState() => _SearchViewState();

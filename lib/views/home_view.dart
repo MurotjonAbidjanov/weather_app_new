@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
@@ -7,7 +7,7 @@ import 'package:weather_app_new/views/search_view.dart';
 import '../constants/constants.dart';
 
 class HomeView extends StatefulWidget {
-  HomeView(this.textFieldText) : super();
+HomeView(this.textFieldText) : super();
   final String textFieldText;
   @override
   State<HomeView> createState() => _HomeViewState();
@@ -44,33 +44,49 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   void initState() {
-    showWeatherLocation();
+    updateUI(null);
     super.initState();
   }
 
-  showCurentData(Position position) async {
+  void updateUI(dynamic jsonData) {
+    setState(() {
+      if (jsonData == null) {
+        city = '';
+        temp = 0;
+        country = '';
+        return;
+      }
+      city = jsonData['name'];
+      temp = jsonData['main']['temp'];
+      setState(() {});
+      country = jsonData['sys']['country'];
+    });
+  }
+
+  Future<dynamic> showCurentData(Position position) async {
     var client = http.Client();
     Uri uri = Uri.parse(
-        'https://api.openweathermap.org/data/2.5/weather?lat=${position.latitude}&lon=${position.longitude}&appid=$cAPIkey');
+        'https://api.openweathermap.org/data/2.5/weather?lat=${position.latitude}&lon=${position.longitude}&appid=$cAPIkey&units=metric');
     try {
       final data = await client.get(uri);
       final jsonAnswer = jsonDecode(data.body);
-      city = jsonAnswer['name'];
-      final kelvin = jsonAnswer['main']['temp'];
-      temp = kelvin - 273.15;
-      setState(() {});
-      country = jsonAnswer['sys']['country'];
-      log('country =====> $country');
-      log('city =====> $city');
-      log('temp =====> ${temp.toStringAsFixed(0)}');
+      return jsonAnswer;
     } catch (e) {
       print('$e');
     }
   }
 
-  showWeatherLocation() async {
-    final position = await getPosition();
-    await showCurentData(position);
+  Future<dynamic> showCityData(String cityName) async {
+    var client = http.Client();
+    Uri uri =
+        Uri.parse('$cHttpCityName?q=$cityName=&appid=$cAPIkey&units=metric');
+    try {
+      final data = await client.get(uri);
+      final jsonAnswer = jsonDecode(data.body);
+      return jsonAnswer;
+    } catch (e) {
+      print('$e');
+    }
   }
 
   @override
@@ -90,7 +106,12 @@ class _HomeViewState extends State<HomeView> {
           elevation: 0,
           backgroundColor: Colors.transparent,
           leading: InkWell(
-            onTap: () {},
+            onTap: () async {
+              final position = await getPosition();
+              var weatherData = await showCurentData(position);
+              updateUI(weatherData);
+              ;
+            },
             child: Icon(
               Icons.near_me,
               size: 35,
@@ -98,11 +119,15 @@ class _HomeViewState extends State<HomeView> {
           ),
           actions: [
             InkWell(
-                onTap: () {
-                  Navigator.push(
+                onTap: () async {
+                   await Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => SearchView()),
                   );
+                  if (widget.textFieldText != false) {
+                    var weatherData = await showCityData(widget.textFieldText.toString());
+                    updateUI(weatherData);
+                  }
                 },
                 child: Icon(
                   Icons.location_city,
@@ -191,17 +216,6 @@ class _HomeViewState extends State<HomeView> {
                   style: TextStyle(
                       fontSize: 60,
                       color: Colors.grey[500],
-                      fontWeight: FontWeight.w700),
-                ),
-              ),
-              Positioned(
-                left: 15,
-                bottom: 5,
-                child: Text(
-                  '${widget.textFieldText}',
-                  style: TextStyle(
-                      fontSize: 60,
-                      color: Colors.white70,
                       fontWeight: FontWeight.w700),
                 ),
               ),
