@@ -49,10 +49,14 @@ class _SearchViewState extends State<SearchView> {
                           onPressed: () {
                             FocusScope.of(context).unfocus();
                             Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        HomeView(_controller.text)));
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => HomeView(
+                                  textFieldText: _controller.text,
+                                ),
+                              ),
+                            );
+                            print(_controller.text);
                           },
                           icon: Icon(
                             Icons.arrow_forward_ios_outlined,

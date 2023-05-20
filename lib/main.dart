@@ -14,7 +14,7 @@ class HomePage extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(),
-      home: HomeView(''),
+      home: HomeView(),
     );
   }
 }

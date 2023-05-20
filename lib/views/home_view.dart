@@ -1,5 +1,6 @@
-import 'dart:convert';
+// ignore_for_file: must_be_immutable
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
@@ -7,16 +8,16 @@ import 'package:weather_app_new/views/search_view.dart';
 import '../constants/constants.dart';
 
 class HomeView extends StatefulWidget {
-HomeView(this.textFieldText) : super();
-  final String textFieldText;
+  HomeView({this.textFieldText}) : super();
   @override
   State<HomeView> createState() => _HomeViewState();
+  String? textFieldText;
 }
 
 class _HomeViewState extends State<HomeView> {
-  String city = '';
-  double temp = 0;
-  String country = '';
+  String? city;
+  double temp = 3;
+  String? country;
 
   Future<Position> getPosition() async {
     bool serviceEnabled;
@@ -44,7 +45,9 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   void initState() {
+    getPosition();
     updateUI(null);
+
     super.initState();
   }
 
@@ -76,17 +79,15 @@ class _HomeViewState extends State<HomeView> {
     }
   }
 
-  Future<dynamic> showCityData(String cityName) async {
+  Future<dynamic> CityName(String cityName) async {
     var client = http.Client();
-    Uri uri =
-        Uri.parse('$cHttpCityName?q=$cityName=&appid=$cAPIkey&units=metric');
-    try {
-      final data = await client.get(uri);
-      final jsonAnswer = jsonDecode(data.body);
-      return jsonAnswer;
-    } catch (e) {
-      print('$e');
-    }
+    Uri uri = Uri.parse(
+        'https://api.openweathermap.org/data/2.5/weather?q=$cityName&appid=$cAPIkey&units=metric');
+
+    final data = await client.get(uri);
+    final jsonAnswer = await jsonDecode(data.body);
+    setState(() {});
+    return jsonAnswer;
   }
 
   @override
@@ -97,7 +98,7 @@ class _HomeViewState extends State<HomeView> {
         appBar: AppBar(
           centerTitle: true,
           title: Text(
-            city,
+            city!,
             style: TextStyle(
                 fontSize: 35,
                 fontWeight: FontWeight.bold,
@@ -110,7 +111,6 @@ class _HomeViewState extends State<HomeView> {
               final position = await getPosition();
               var weatherData = await showCurentData(position);
               updateUI(weatherData);
-              ;
             },
             child: Icon(
               Icons.near_me,
@@ -119,15 +119,19 @@ class _HomeViewState extends State<HomeView> {
           ),
           actions: [
             InkWell(
-                onTap: () async {
-                   await Navigator.push(
+                onTap: () {
+                  if (widget.textFieldText != widget.textFieldText) {
+                    var weatherData = CityName(widget.textFieldText.toString());
+                    updateUI(weatherData);
+                  }
+
+                  Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => SearchView()),
                   );
-                  if (widget.textFieldText != false) {
-                    var weatherData = await showCityData(widget.textFieldText.toString());
-                    updateUI(weatherData);
-                  }
+
+                  print('=====> ${widget.textFieldText}');
+                  setState(() {});
                 },
                 child: Icon(
                   Icons.location_city,
@@ -212,7 +216,7 @@ class _HomeViewState extends State<HomeView> {
                 right: 15,
                 bottom: 5,
                 child: Text(
-                  country,
+                  country!,
                   style: TextStyle(
                       fontSize: 60,
                       color: Colors.grey[500],
