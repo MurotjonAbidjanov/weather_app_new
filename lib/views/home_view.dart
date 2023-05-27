@@ -1,6 +1,5 @@
-// ignore_for_file: must_be_immutable
-
 import 'dart:convert';
+import 'dart:developer' show log;
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
@@ -8,16 +7,16 @@ import 'package:weather_app_new/views/search_view.dart';
 import '../constants/constants.dart';
 
 class HomeView extends StatefulWidget {
-  HomeView({this.textFieldText}) : super();
+  HomeView() : super();
   @override
   State<HomeView> createState() => _HomeViewState();
-  String? textFieldText;
 }
 
 class _HomeViewState extends State<HomeView> {
-  String? city;
-  double temp = 3;
-  String? country;
+  String city = '';
+  double temp = 0;
+  String country = '';
+  bool isLoading = true;
 
   Future<Position> getPosition() async {
     bool serviceEnabled;
@@ -45,49 +44,51 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   void initState() {
-    getPosition();
-    updateUI(null);
-
+    showWeatherData();
     super.initState();
   }
 
-  void updateUI(dynamic jsonData) {
-    setState(() {
-      if (jsonData == null) {
-        city = '';
-        temp = 0;
-        country = '';
-        return;
-      }
-      city = jsonData['name'];
-      temp = jsonData['main']['temp'];
-      setState(() {});
-      country = jsonData['sys']['country'];
-    });
+  showWeatherData() async {
+    final position = await getPosition();
+    showCurentData(position);
   }
 
   Future<dynamic> showCurentData(Position position) async {
-    var client = http.Client();
+    http.Client client = http.Client();
+
     Uri uri = Uri.parse(
-        'https://api.openweathermap.org/data/2.5/weather?lat=${position.latitude}&lon=${position.longitude}&appid=$cAPIkey&units=metric');
+        'https://api.openweathermap.org/data/2.5/weather?lat=${position.latitude}&lon=${position.longitude}&appid=d903e15dea212b1925186440914122e5&units=metric');
+
+    isLoading = true;
     try {
       final data = await client.get(uri);
+      log('data ==> $data');
       final jsonAnswer = jsonDecode(data.body);
-      return jsonAnswer;
+      city = jsonAnswer['name'];
+      temp = jsonAnswer['main']['temp'];
+      country = jsonAnswer['sys']['country'];
+      isLoading = false;
+      setState(() {});
     } catch (e) {
-      print('$e');
+      log('error ===> $e');
+      throw Exception(e);
     }
   }
 
-  Future<dynamic> CityName(String cityName) async {
+  Future<dynamic> CityName({String? cityName}) async {
     var client = http.Client();
     Uri uri = Uri.parse(
-        'https://api.openweathermap.org/data/2.5/weather?q=$cityName&appid=$cAPIkey&units=metric');
-
-    final data = await client.get(uri);
-    final jsonAnswer = await jsonDecode(data.body);
-    setState(() {});
-    return jsonAnswer;
+        'https://api.openweathermap.org/data/2.5/weather?q=$cityName&appid=d903e15dea212b1925186440914122e5&units=metric');
+    isLoading = true;
+    try {
+      final data = await client.get(uri);
+      final jsonAnswer = await jsonDecode(data.body);
+      city = jsonAnswer['name'];
+      temp = jsonAnswer['main']['temp'];
+      country = jsonAnswer['sys']['country'];
+      isLoading = false;
+      setState(() {});
+    } catch (e) {}
   }
 
   @override
@@ -98,7 +99,7 @@ class _HomeViewState extends State<HomeView> {
         appBar: AppBar(
           centerTitle: true,
           title: Text(
-            city!,
+            city,
             style: TextStyle(
                 fontSize: 35,
                 fontWeight: FontWeight.bold,
@@ -109,8 +110,7 @@ class _HomeViewState extends State<HomeView> {
           leading: InkWell(
             onTap: () async {
               final position = await getPosition();
-              var weatherData = await showCurentData(position);
-              updateUI(weatherData);
+              showCurentData(position);
             },
             child: Icon(
               Icons.near_me,
@@ -120,18 +120,11 @@ class _HomeViewState extends State<HomeView> {
           actions: [
             InkWell(
                 onTap: () {
-                  if (widget.textFieldText != widget.textFieldText) {
-                    var weatherData = CityName(widget.textFieldText.toString());
-                    updateUI(weatherData);
-                  }
-
-                  Navigator.push(
+                  var cityNameText = Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => SearchView()),
                   );
-
-                  print('=====> ${widget.textFieldText}');
-                  setState(() {});
+                  CityName(cityName: cityNameText.toString());
                 },
                 child: Icon(
                   Icons.location_city,
@@ -147,84 +140,89 @@ class _HomeViewState extends State<HomeView> {
                 image: AssetImage('assets/images/sunrise.jpg'),
                 fit: BoxFit.cover),
           ),
-          child: Stack(
-            children: [
-              Positioned(
-                top: 120,
-                left: 20,
-                child: Text('${temp.toStringAsFixed(0)}°C'.toUpperCase(),
-                    style: cTempTextStyle),
-              ),
-              Positioned(
-                top: 110,
-                right: 110,
-                child: Text(
-                  '☀',
-                  style: TextStyle(
-                      fontSize: 50,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white70),
-                ),
-              ),
-              Positioned(
-                right: 30,
-                top: 350,
-                child: Text(
-                  'You\'ll',
-                  style: cDescTextstyle,
-                ),
-              ),
-              Positioned(
-                top: 440,
-                right: 10,
-                child: Row(
+          child: isLoading == true
+              ? Center(
+                  child: CircularProgressIndicator(
+                  color: Colors.white70,
+                ))
+              : Stack(
                   children: [
-                    Text(
-                      'need',
-                      style: cDescTextstyle,
+                    Positioned(
+                      top: 120,
+                      left: 20,
+                      child: Text('${temp.toStringAsFixed(0)}°C'.toUpperCase(),
+                          style: cTempTextStyle),
                     ),
-                    SizedBox(
-                      width: 10,
+                    Positioned(
+                      top: 110,
+                      right: 110,
+                      child: Text(
+                        '☀',
+                        style: TextStyle(
+                            fontSize: 50,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white70),
+                      ),
                     ),
-                    Text(
-                      '🍨',
-                      style: cDescTextstyle,
-                    )
+                    Positioned(
+                      right: 30,
+                      top: 350,
+                      child: Text(
+                        'You\'ll',
+                        style: cDescTextstyle,
+                      ),
+                    ),
+                    Positioned(
+                      top: 440,
+                      right: 10,
+                      child: Row(
+                        children: [
+                          Text(
+                            'need',
+                            style: cDescTextstyle,
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            '🍨',
+                            style: cDescTextstyle,
+                          )
+                        ],
+                      ),
+                    ),
+                    Positioned(
+                      top: 530,
+                      right: 10,
+                      child: Row(
+                        children: [
+                          Text(
+                            'and',
+                            style: cDescTextstyle,
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            '🧃',
+                            style: cDescTextstyle,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Positioned(
+                      right: 15,
+                      bottom: 5,
+                      child: Text(
+                        country,
+                        style: TextStyle(
+                            fontSize: 60,
+                            color: Colors.grey[500],
+                            fontWeight: FontWeight.w700),
+                      ),
+                    ),
                   ],
                 ),
-              ),
-              Positioned(
-                top: 530,
-                right: 10,
-                child: Row(
-                  children: [
-                    Text(
-                      'and',
-                      style: cDescTextstyle,
-                    ),
-                    SizedBox(
-                      width: 10,
-                    ),
-                    Text(
-                      '🧃',
-                      style: cDescTextstyle,
-                    ),
-                  ],
-                ),
-              ),
-              Positioned(
-                right: 15,
-                bottom: 5,
-                child: Text(
-                  country!,
-                  style: TextStyle(
-                      fontSize: 60,
-                      color: Colors.grey[500],
-                      fontWeight: FontWeight.w700),
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );

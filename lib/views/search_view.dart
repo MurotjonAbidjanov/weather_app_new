@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:weather_app_new/views/home_view.dart';
 
 class SearchView extends StatefulWidget {
   SearchView({
@@ -48,15 +47,7 @@ class _SearchViewState extends State<SearchView> {
                       suffixIcon: IconButton(
                           onPressed: () {
                             FocusScope.of(context).unfocus();
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => HomeView(
-                                  textFieldText: _controller.text,
-                                ),
-                              ),
-                            );
-                            print(_controller.text);
+                            Navigator.pop(context, _controller.text);
                           },
                           icon: Icon(
                             Icons.arrow_forward_ios_outlined,
