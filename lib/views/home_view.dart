@@ -71,7 +71,6 @@ class _HomeViewState extends State<HomeView> {
       setState(() {});
     } catch (e) {
       log('error ===> $e');
-      throw Exception(e);
     }
   }
 
