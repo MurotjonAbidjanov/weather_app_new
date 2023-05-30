@@ -53,7 +53,7 @@ class _HomeViewState extends State<HomeView> {
     showCurentData(position);
   }
 
-  Future<dynamic> showCurentData(Position position) async {
+  Future<void> showCurentData(Position position) async {
     http.Client client = http.Client();
 
     Uri uri = Uri.parse(
@@ -62,7 +62,7 @@ class _HomeViewState extends State<HomeView> {
     isLoading = true;
     try {
       final data = await client.get(uri);
-      log('data ==> $data');
+
       final jsonAnswer = jsonDecode(data.body);
       city = jsonAnswer['name'];
       temp = jsonAnswer['main']['temp'];
@@ -74,7 +74,7 @@ class _HomeViewState extends State<HomeView> {
     }
   }
 
-  Future<dynamic> CityName({String? cityName}) async {
+  Future<void> CityName({String? cityName}) async {
     var client = http.Client();
     Uri uri = Uri.parse(
         'https://api.openweathermap.org/data/2.5/weather?q=$cityName&appid=d903e15dea212b1925186440914122e5&units=metric');
@@ -118,11 +118,12 @@ class _HomeViewState extends State<HomeView> {
           ),
           actions: [
             InkWell(
-                onTap: () {
-                  var cityNameText = Navigator.push(
+                onTap: () async {
+                  var cityNameText = await Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => SearchView()),
                   );
+                  log("$cityNameText");
                   CityName(cityName: cityNameText.toString());
                 },
                 child: Icon(
@@ -210,7 +211,7 @@ class _HomeViewState extends State<HomeView> {
                       ),
                     ),
                     Positioned(
-                      right: 15,
+                      left: 15,
                       bottom: 5,
                       child: Text(
                         country,
